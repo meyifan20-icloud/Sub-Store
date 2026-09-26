@@ -8,6 +8,12 @@ Telegram 频道: [`https://telegram.me/cool_scripts` ](https://telegram.me/cool_
 
 ## 服务器/云平台/Docker/Android 版
 
+本仓库自维护部署指南：
+
+https://github.com/meyifan20-icloud/Sub-Store/blob/master/docs/DEPLOYMENT.md
+
+上游历史教程（参考）：
+
 https://xream.notion.site/Sub-Store-abe6a96944724dc6a36833d5c9ab7c87
 
 ## App 版
