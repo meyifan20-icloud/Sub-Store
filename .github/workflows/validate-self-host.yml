@@ -67,3 +67,29 @@ jobs:
       - name: Build full self-host image
         run: |
           docker build --pull -t sub-store-selfhost:test .
+
+      - name: Smoke test full container
+        run: |
+          docker run -d --name sub-store-smoke -p 127.0.0.1:3001:3001 sub-store-selfhost:test
+          trap 'docker rm -f sub-store-smoke >/dev/null 2>&1 || true' EXIT
+
+          for i in $(seq 1 30); do
+            STATUS="$(docker inspect --format '{{.State.Health.Status}}' sub-store-smoke)"
+            if [ "$STATUS" = "healthy" ]; then
+              docker exec sub-store-smoke test -x /opt/app/http-meta/http-meta
+              docker exec sub-store-smoke test -x /usr/local/bin/shoutrrr
+              docker exec sub-store-smoke test -s /opt/app/http-meta.bundle.js
+              docker exec sub-store-smoke test -s /opt/app/frontend/index.html
+              exit 0
+            fi
+
+            if [ "$STATUS" = "unhealthy" ]; then
+              docker logs sub-store-smoke
+              exit 1
+            fi
+
+            sleep 2
+          done
+
+          docker logs sub-store-smoke
+          exit 1
