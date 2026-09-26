@@ -130,8 +130,8 @@ jobs:
                   text = data.decode("utf-8")
               except UnicodeDecodeError:
                   continue
-              urls.update(m.group(0) for m in latest.finditer(text))
-              urls.update(m.group(0) for m in tagged.finditer(text))
+              urls.update(m.group(0).rstrip(",.;:") for m in latest.finditer(text))
+              urls.update(m.group(0).rstrip(",.;:") for m in tagged.finditer(text))
 
           with open("/tmp/release-assets.tsv", "w", encoding="utf-8") as out:
               for url in sorted(urls):
