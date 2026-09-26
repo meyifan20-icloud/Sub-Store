@@ -40,9 +40,12 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Record current personal revision
+      - name: Save personal overlay
         shell: bash
         run: |
+          mkdir -p /tmp/personal-overlay
+          cp README.md /tmp/personal-overlay/README.md
+          cp .github/workflows/sync-upstream.yml /tmp/personal-overlay/sync-upstream.yml
           echo "BEFORE_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
       - name: Fetch official upstream
@@ -57,14 +60,47 @@ jobs:
         run: |
           git merge --no-edit -X ours upstream/master
 
-      - name: Keep default-branch resource entry points on personal repository
+      - name: Restore protected personal overlay
+        shell: bash
+        run: |
+          cp /tmp/personal-overlay/sync-upstream.yml .github/workflows/sync-upstream.yml
+
+          python3 - <<'PY'
+          from pathlib import Path
+
+          current = Path("README.md").read_text(encoding="utf-8")
+          saved = Path("/tmp/personal-overlay/README.md").read_text(encoding="utf-8")
+
+          start = "<!-- PERSONAL-UPSTREAM-SYNC:START -->"
+          end = "<!-- PERSONAL-UPSTREAM-SYNC:END -->"
+
+          def extract_block(text):
+              if start in text and end in text:
+                  s = text.index(start)
+                  e = text.index(end, s) + len(end)
+                  return text[s:e].strip()
+              return ""
+
+          personal = extract_block(saved)
+          if personal:
+              if start in current and end in current:
+                  s = current.index(start)
+                  e = current.index(end, s) + len(end)
+                  current = current[:s] + personal + current[e:]
+              else:
+                  current = personal + "\n\n" + current.lstrip()
+
+          Path("README.md").write_text(current, encoding="utf-8")
+          PY
+
+      - name: Rewrite runtime and install resource endpoints
         shell: bash
         env:
           PERSONAL_REPO: meyifan20-icloud/Sub-Store
           UPSTREAM_REPO: sub-store-org/Sub-Store
           UPSTREAM_BRANCH: master
         run: |
-          python3 - <<'PY'
+          cat > /tmp/rewrite-personal-endpoints.py <<'PY'
           import os
           import subprocess
           from pathlib import Path
@@ -116,31 +152,33 @@ jobs:
                   path.write_text(new, encoding="utf-8")
                   changed.append(str(path))
 
-          if changed:
-              print("Rewritten personal resource entry points:")
-              for path in changed:
-                  print(f"  - {path}")
-          else:
-              print("No default-branch upstream resource entry points needed rewriting.")
+          print(f"Rewritten files: {len(changed)}")
+          for path in changed:
+              print(f"  - {path}")
           PY
 
-          if ! git diff --quiet; then
-            git add -A
-            git commit -m "chore: keep resource endpoints on personal repository"
-          fi
+          python3 /tmp/rewrite-personal-endpoints.py
+          python3 /tmp/rewrite-personal-endpoints.py
 
-      - name: Verify no default-branch upstream resource entry points remain
+      - name: Verify protected workflow and personal endpoints
         shell: bash
         env:
+          PERSONAL_REPO: meyifan20-icloud/Sub-Store
           UPSTREAM_REPO: sub-store-org/Sub-Store
           UPSTREAM_BRANCH: master
         run: |
+          cmp -s .github/workflows/sync-upstream.yml /tmp/personal-overlay/sync-upstream.yml || {
+            echo "Protected sync workflow changed unexpectedly."
+            exit 1
+          }
+
           python3 - <<'PY'
           import os
           import subprocess
           import sys
           from pathlib import Path
 
+          personal = os.environ["PERSONAL_REPO"]
           upstream = os.environ["UPSTREAM_REPO"]
           branch = os.environ["UPSTREAM_BRANCH"]
 
@@ -176,16 +214,40 @@ jobs:
                   if any(item in line for item in forbidden):
                       bad.append(f"{path}:{lineno}: {line.strip()}")
 
+          readme = Path("README.md").read_text(encoding="utf-8")
+          required = (
+              f"https://github.com/{personal}",
+              f"https://raw.githubusercontent.com/{personal}/{branch}/",
+              "<!-- PERSONAL-UPSTREAM-SYNC:START -->",
+              "<!-- PERSONAL-UPSTREAM-SYNC:END -->",
+          )
+          missing = [item for item in required if item not in readme]
+
           if bad:
-              print("Blocked: upstream runtime/install resource entry points still remain:")
+              print("Blocked: upstream runtime/install endpoints remain:")
               for item in bad:
                   print(item)
+
+          if missing:
+              print("Blocked: personal README overlay is incomplete:")
+              for item in missing:
+                  print(item)
+
+          if bad or missing:
               sys.exit(1)
 
-          print("Verified: default-branch runtime/install resources use the personal repository.")
+          print("Verified: personal runtime/install endpoints and protected overlay are intact.")
           PY
 
-      - name: Push only to personal repository
+      - name: Commit synchronization result
+        shell: bash
+        run: |
+          if ! git diff --quiet || ! git diff --cached --quiet; then
+            git add -A
+            git commit -m "chore: sync official upstream"
+          fi
+
+      - name: Final origin check and push
         shell: bash
         run: |
           AFTER_SHA="$(git rev-parse HEAD)"
