@@ -1,0 +1,49 @@
+name: 手动同步官方上游 / Sync Upstream
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-upstream-master
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: 同步 sub-store-org/Sub-Store → master
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure git
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Fetch official upstream
+        shell: bash
+        run: |
+          git remote remove upstream 2>/dev/null || true
+          git remote add upstream https://github.com/sub-store-org/Sub-Store.git
+          git fetch upstream master
+
+      - name: Merge upstream safely
+        shell: bash
+        run: |
+          BEFORE=$(git rev-parse HEAD)
+          git merge --no-edit -X ours upstream/master
+          AFTER=$(git rev-parse HEAD)
+
+          if [ "$BEFORE" = "$AFTER" ]; then
+            echo "No upstream changes. Repository is already up to date."
+            exit 0
+          fi
+
+          git push origin HEAD:master
