@@ -57,11 +57,12 @@ jobs:
         run: |
           git merge --no-edit -X ours upstream/master
 
-      - name: Keep resource entry points on personal repository
+      - name: Keep default-branch resource entry points on personal repository
         shell: bash
         env:
           PERSONAL_REPO: meyifan20-icloud/Sub-Store
           UPSTREAM_REPO: sub-store-org/Sub-Store
+          UPSTREAM_BRANCH: master
         run: |
           python3 - <<'PY'
           import os
@@ -70,14 +71,15 @@ jobs:
 
           personal = os.environ["PERSONAL_REPO"]
           upstream = os.environ["UPSTREAM_REPO"]
+          branch = os.environ["UPSTREAM_BRANCH"]
 
           replacements = {
-              f"https://raw.githubusercontent.com/{upstream}/":
-                  f"https://raw.githubusercontent.com/{personal}/",
-              f"https://cdn.jsdelivr.net/gh/{upstream}@":
-                  f"https://cdn.jsdelivr.net/gh/{personal}@",
-              f"https://cdn.jsdelivr.net/gh/{upstream}/":
-                  f"https://cdn.jsdelivr.net/gh/{personal}/",
+              f"https://raw.githubusercontent.com/{upstream}/{branch}/":
+                  f"https://raw.githubusercontent.com/{personal}/{branch}/",
+              f"https://raw.githubusercontent.com/{upstream}/refs/heads/{branch}/":
+                  f"https://raw.githubusercontent.com/{personal}/refs/heads/{branch}/",
+              f"https://cdn.jsdelivr.net/gh/{upstream}@{branch}/":
+                  f"https://cdn.jsdelivr.net/gh/{personal}@{branch}/",
               f"https://deploy.workers.cloudflare.com/?url=https://github.com/{upstream}":
                   f"https://deploy.workers.cloudflare.com/?url=https://github.com/{personal}",
               f"https://vercel.com/new/clone?repository-url=https://github.com/{upstream}":
@@ -115,11 +117,11 @@ jobs:
                   changed.append(str(path))
 
           if changed:
-              print("Rewritten resource entry points:")
+              print("Rewritten personal resource entry points:")
               for path in changed:
                   print(f"  - {path}")
           else:
-              print("No upstream resource entry points needed rewriting.")
+              print("No default-branch upstream resource entry points needed rewriting.")
           PY
 
           if ! git diff --quiet; then
@@ -127,10 +129,11 @@ jobs:
             git commit -m "chore: keep resource endpoints on personal repository"
           fi
 
-      - name: Verify no upstream resource entry points remain
+      - name: Verify no default-branch upstream resource entry points remain
         shell: bash
         env:
           UPSTREAM_REPO: sub-store-org/Sub-Store
+          UPSTREAM_BRANCH: master
         run: |
           python3 - <<'PY'
           import os
@@ -139,13 +142,16 @@ jobs:
           from pathlib import Path
 
           upstream = os.environ["UPSTREAM_REPO"]
-          markers = (
-              "raw.githubusercontent.com",
-              "cdn.jsdelivr.net/gh/",
-              "deploy.workers.cloudflare.com/",
-              "vercel.com/new/clone",
-              "git clone ",
-              "repository-url=",
+          branch = os.environ["UPSTREAM_BRANCH"]
+
+          forbidden = (
+              f"https://raw.githubusercontent.com/{upstream}/{branch}/",
+              f"https://raw.githubusercontent.com/{upstream}/refs/heads/{branch}/",
+              f"https://cdn.jsdelivr.net/gh/{upstream}@{branch}/",
+              f"https://deploy.workers.cloudflare.com/?url=https://github.com/{upstream}",
+              f"https://vercel.com/new/clone?repository-url=https://github.com/{upstream}",
+              f"git clone https://github.com/{upstream}.git",
+              f"git clone https://github.com/{upstream}",
           )
 
           files = subprocess.check_output(["git", "ls-files", "-z"]).split(b"\0")
@@ -167,16 +173,16 @@ jobs:
                   continue
 
               for lineno, line in enumerate(text.splitlines(), 1):
-                  if upstream in line and any(marker in line for marker in markers):
+                  if any(item in line for item in forbidden):
                       bad.append(f"{path}:{lineno}: {line.strip()}")
 
           if bad:
-              print("Blocked: upstream resource entry points still remain:")
+              print("Blocked: upstream runtime/install resource entry points still remain:")
               for item in bad:
                   print(item)
               sys.exit(1)
 
-          print("Verified: resource entry points do not use upstream repository.")
+          print("Verified: default-branch runtime/install resources use the personal repository.")
           PY
 
       - name: Push only to personal repository
