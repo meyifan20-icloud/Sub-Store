@@ -4,7 +4,7 @@ backend-build:
 	cd backend && corepack enable && pnpm install --frozen-lockfile && pnpm bundle:esbuild
 
 runtime:
-	./deploy/node/prepare-runtime.sh
+	sh deploy/node/prepare-runtime.sh
 
 docker-build:
 	docker compose build
