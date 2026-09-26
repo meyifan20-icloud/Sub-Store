@@ -10,6 +10,8 @@ services:
       - .env
     environment:
       SUB_STORE_BACKEND_API_HOST: 0.0.0.0
+      SUB_STORE_FRONTEND_PATH: /opt/app/frontend
+      SUB_STORE_DATA_BASE_PATH: /opt/app/data
     ports:
       - "127.0.0.1:3001:3001"
     volumes:
