@@ -2,9 +2,6 @@ name: 手动同步官方上游 / Sync Upstream
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - master
 
 permissions:
   contents: write
@@ -110,10 +107,10 @@ jobs:
 
           upstream = os.environ["UPSTREAM_REPO"]
           latest = re.compile(
-              rf"https://github\.com/{re.escape(upstream)}/releases/latest/download/([^\s\)\]\"'<>?#]+)"
+              rf"https://github\.com/{re.escape(upstream)}/releases/latest/download/([^,\s\)\]\"'<>?#]+)"
           )
           tagged = re.compile(
-              rf"https://github\.com/{re.escape(upstream)}/releases/download/([^/\s\)\]\"'<>?#]+)/([^\s\)\]\"'<>?#]+)"
+              rf"https://github\.com/{re.escape(upstream)}/releases/download/([^/,\s\)\]\"'<>?#]+)/([^,\s\)\]\"'<>?#]+)"
           )
 
           files = subprocess.check_output(["git", "ls-files", "-z"]).split(b"\0")
