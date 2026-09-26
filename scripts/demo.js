@@ -148,7 +148,7 @@ function operator(proxies = [], targetPlatform, context) {
   // lodash
 
   // $substore 为 OpenAPI
-  // 源码 https://raw.githubusercontent.com/sub-store-org/Sub-Store/refs/heads/master/backend/src/vendor/open-api.js
+  // 源码 https://raw.githubusercontent.com/meyifan20-icloud/Sub-Store/refs/heads/master/backend/src/vendor/open-api.js
   // 一个发请求的例子
   // const $ = $substore
   // const { body, statusCode } = await $.http.post({

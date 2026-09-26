@@ -26,9 +26,9 @@ SUB_STORE_CORS_ALLOWED_ORIGINS=https://sub-store.vercel.app,http://127.0.0.1:888
 
 ### 1. Loon
 
-安装使用 插件 [`https://raw.githubusercontent.com/sub-store-org/Sub-Store/master/config/Loon.plugin`](https://raw.githubusercontent.com/sub-store-org/Sub-Store/master/config/Loon.plugin) 即可。
+安装使用 插件 [`https://raw.githubusercontent.com/meyifan20-icloud/Sub-Store/master/config/Loon.plugin`](https://raw.githubusercontent.com/meyifan20-icloud/Sub-Store/master/config/Loon.plugin) 即可。
 
-新版 Loon 3.5.0(969)及以上版本 使用资源解析器插件 [`https://raw.githubusercontent.com/sub-store-org/Sub-Store/master/config/Loon-parser.plugin`](https://raw.githubusercontent.com/sub-store-org/Sub-Store/master/config/Loon-parser.plugin)
+新版 Loon 3.5.0(969)及以上版本 使用资源解析器插件 [`https://raw.githubusercontent.com/meyifan20-icloud/Sub-Store/master/config/Loon-parser.plugin`](https://raw.githubusercontent.com/meyifan20-icloud/Sub-Store/master/config/Loon-parser.plugin)
 旧版 Loon 在资源解析器中使用 [https://github.com/sub-store-org/Sub-Store/releases/latest/download/sub-store-parser.loon.min.js](https://github.com/sub-store-org/Sub-Store/releases/latest/download/sub-store-parser.loon.min.js)
 
 详见 [Loon 资源解析器说明](https://github.com/sub-store-org/Sub-Store/wiki/Loon-%E8%B5%84%E6%BA%90%E8%A7%A3%E6%9E%90%E5%99%A8%E8%AF%B4%E6%98%8E)
@@ -41,33 +41,33 @@ Surge Mac 版如何支持 SSR, 如何去除 HTTP 传输层以支持 类似 VMess
 
 定时处理订阅 功能, 避免 App 内拉取超时, 请查看 [定时处理订阅](https://telegram.me/zhetengsha/1449)
 
-0. 最新 Surge iOS TestFlight 版本 可使用 Beta 版(支持最新 Surge iOS TestFlight 版本的特性): [`https://raw.githubusercontent.com/sub-store-org/Sub-Store/master/config/Surge-Beta.sgmodule`](https://raw.githubusercontent.com/sub-store-org/Sub-Store/master/config/Surge-Beta.sgmodule)
+0. 最新 Surge iOS TestFlight 版本 可使用 Beta 版(支持最新 Surge iOS TestFlight 版本的特性): [`https://raw.githubusercontent.com/meyifan20-icloud/Sub-Store/master/config/Surge-Beta.sgmodule`](https://raw.githubusercontent.com/meyifan20-icloud/Sub-Store/master/config/Surge-Beta.sgmodule)
 
-1. 官方默认版模块(支持 App 内使用编辑参数): [`https://raw.githubusercontent.com/sub-store-org/Sub-Store/master/config/Surge.sgmodule`](https://raw.githubusercontent.com/sub-store-org/Sub-Store/master/config/Surge.sgmodule)
+1. 官方默认版模块(支持 App 内使用编辑参数): [`https://raw.githubusercontent.com/meyifan20-icloud/Sub-Store/master/config/Surge.sgmodule`](https://raw.githubusercontent.com/meyifan20-icloud/Sub-Store/master/config/Surge.sgmodule)
 
 > 最新版 Surge 已删除 `ability: http-client-policy` 参数, 模块暂不做修改, 对测落地功能无影响
 
-2. 经典版, 不支持编辑参数, 固定带 ability 参数版本, 使用 jsc 引擎时, 可能会爆内存, 如果需要使用指定节点功能 例如[加旗帜脚本或者 cname 脚本] 请使用此带 ability 参数版本: [`https://raw.githubusercontent.com/sub-store-org/Sub-Store/master/config/Surge-ability.sgmodule`](https://raw.githubusercontent.com/sub-store-org/Sub-Store/master/config/Surge-ability.sgmodule)
+2. 经典版, 不支持编辑参数, 固定带 ability 参数版本, 使用 jsc 引擎时, 可能会爆内存, 如果需要使用指定节点功能 例如[加旗帜脚本或者 cname 脚本] 请使用此带 ability 参数版本: [`https://raw.githubusercontent.com/meyifan20-icloud/Sub-Store/master/config/Surge-ability.sgmodule`](https://raw.githubusercontent.com/meyifan20-icloud/Sub-Store/master/config/Surge-ability.sgmodule)
 
-3. 经典版, 不支持编辑参数, 固定不带 ability 参数版本： [`https://raw.githubusercontent.com/sub-store-org/Sub-Store/master/config/Surge-Noability.sgmodule`](https://raw.githubusercontent.com/sub-store-org/Sub-Store/master/config/Surge-Noability.sgmodule)
+3. 经典版, 不支持编辑参数, 固定不带 ability 参数版本： [`https://raw.githubusercontent.com/meyifan20-icloud/Sub-Store/master/config/Surge-Noability.sgmodule`](https://raw.githubusercontent.com/meyifan20-icloud/Sub-Store/master/config/Surge-Noability.sgmodule)
 
 ### 3. QX
 
-订阅 重写 [`https://raw.githubusercontent.com/sub-store-org/Sub-Store/master/config/QX.snippet`](https://raw.githubusercontent.com/sub-store-org/Sub-Store/master/config/QX.snippet) 即可。
+订阅 重写 [`https://raw.githubusercontent.com/meyifan20-icloud/Sub-Store/master/config/QX.snippet`](https://raw.githubusercontent.com/meyifan20-icloud/Sub-Store/master/config/QX.snippet) 即可。
 
-定时任务: [`https://raw.githubusercontent.com/sub-store-org/Sub-Store/master/config/QX-Task.json`](https://raw.githubusercontent.com/sub-store-org/Sub-Store/master/config/QX-Task.json)
+定时任务: [`https://raw.githubusercontent.com/meyifan20-icloud/Sub-Store/master/config/QX-Task.json`](https://raw.githubusercontent.com/meyifan20-icloud/Sub-Store/master/config/QX-Task.json)
 
 ### 4. Stash
 
-安装使用 覆写 [`https://raw.githubusercontent.com/sub-store-org/Sub-Store/master/config/Stash.stoverride`](https://raw.githubusercontent.com/sub-store-org/Sub-Store/master/config/Stash.stoverride) 即可。
+安装使用 覆写 [`https://raw.githubusercontent.com/meyifan20-icloud/Sub-Store/master/config/Stash.stoverride`](https://raw.githubusercontent.com/meyifan20-icloud/Sub-Store/master/config/Stash.stoverride) 即可。
 
 ### 5. Shadowrocket
 
-安装使用 模块 [`https://raw.githubusercontent.com/sub-store-org/Sub-Store/master/config/Surge-Noability.sgmodule`](https://raw.githubusercontent.com/sub-store-org/Sub-Store/master/config/Surge-Noability.sgmodule) 即可。
+安装使用 模块 [`https://raw.githubusercontent.com/meyifan20-icloud/Sub-Store/master/config/Surge-Noability.sgmodule`](https://raw.githubusercontent.com/meyifan20-icloud/Sub-Store/master/config/Surge-Noability.sgmodule) 即可。
 
 ### 6. Egern
 
-安装使用 模块 [`https://raw.githubusercontent.com/sub-store-org/Sub-Store/master/config/Egern.yaml`](https://raw.githubusercontent.com/sub-store-org/Sub-Store/master/config/Egern.yaml) 即可。
+安装使用 模块 [`https://raw.githubusercontent.com/meyifan20-icloud/Sub-Store/master/config/Egern.yaml`](https://raw.githubusercontent.com/meyifan20-icloud/Sub-Store/master/config/Egern.yaml) 即可。
 
 ## 使用 Sub-Store
 

@@ -146,11 +146,11 @@ describe('download github proxy regex', function () {
 
     it('prefixes matching download urls with the github proxy', async function () {
         await download(
-            'https://raw.githubusercontent.com/sub-store-org/Sub-Store/master/README.md',
+            'https://raw.githubusercontent.com/meyifan20-icloud/Sub-Store/master/README.md',
         );
 
         expect(capturedUrls).to.deep.equal([
-            'https://ghproxy.test/https://raw.githubusercontent.com/sub-store-org/Sub-Store/master/README.md',
+            'https://ghproxy.test/https://raw.githubusercontent.com/meyifan20-icloud/Sub-Store/master/README.md',
         ]);
     });
 
@@ -175,11 +175,11 @@ describe('download github proxy regex', function () {
             '^https://RAW\\.GITHUBUSERCONTENT\\.COM';
 
         await download(
-            'https://raw.githubusercontent.com/sub-store-org/Sub-Store/master/README.md',
+            'https://raw.githubusercontent.com/meyifan20-icloud/Sub-Store/master/README.md',
         );
 
         expect(capturedUrls).to.deep.equal([
-            'https://ghproxy.test/https://raw.githubusercontent.com/sub-store-org/Sub-Store/master/README.md',
+            'https://ghproxy.test/https://raw.githubusercontent.com/meyifan20-icloud/Sub-Store/master/README.md',
         ]);
     });
 
@@ -187,11 +187,11 @@ describe('download github proxy regex', function () {
         state[SETTINGS_KEY].githubProxyRegex = '[';
 
         await download(
-            'https://raw.githubusercontent.com/sub-store-org/Sub-Store/master/README.md',
+            'https://raw.githubusercontent.com/meyifan20-icloud/Sub-Store/master/README.md',
         );
 
         expect(capturedUrls).to.deep.equal([
-            'https://raw.githubusercontent.com/sub-store-org/Sub-Store/master/README.md',
+            'https://raw.githubusercontent.com/meyifan20-icloud/Sub-Store/master/README.md',
         ]);
         expect(errorLogs).to.have.length(1);
         expect(errorLogs[0]).to.contain('GitHub 加速代理匹配正则无效');

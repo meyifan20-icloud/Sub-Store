@@ -1,5 +1,5 @@
 #!name=Loon 订阅解析器
-#!desc=专门用于解析订阅节点的插件, 需 Loon 3.5.0(969)及以上版本. 若需要完整版 Sub-Store, 请使用 Sub-Store Loon 插件 https://raw.githubusercontent.com/sub-store-org/Sub-Store/master/config/Loon.plugin
+#!desc=专门用于解析订阅节点的插件, 需 Loon 3.5.0(969)及以上版本. 若需要完整版 Sub-Store, 请使用 Sub-Store Loon 插件 https://raw.githubusercontent.com/meyifan20-icloud/Sub-Store/master/config/Loon.plugin
 #!tag=解析器,Sub-Store
 #!system=
 #!system_version=
