@@ -1,3 +1,22 @@
+<!-- PERSONAL-UPSTREAM-SYNC:START -->
+## 🔄 手动同步官方上游
+
+[![立即同步官方上游](https://img.shields.io/badge/🔄_立即同步官方上游-Run_workflow-2ea44f?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/meyifan20-icloud/Sub-Store/actions/workflows/sync-upstream.yml)
+
+**同步方法：**
+
+1. 点击上面的 **「立即同步官方上游」** 按钮。
+2. 进入 GitHub Actions 页面后，点击右侧 **Run workflow**。
+3. Branch 保持 **master**，再点击绿色 **Run workflow**。
+4. 等待任务显示 ✅ 成功。
+5. 有上游更新时会合并并推送；没有变化时不会生成新提交。
+6. 仅手动触发，不设置定时自动同步。
+
+官方上游：[`sub-store-org/Sub-Store`](https://github.com/sub-store-org/Sub-Store)（`master`）
+
+> 本仓库按独立仓库维护。同步采用保留本地修改的合并方式；如遇无法自动处理的冲突，工作流会失败并停止推送，避免覆盖个人定制。
+<!-- PERSONAL-UPSTREAM-SYNC:END -->
+
 <p align="center">
 <img src="https://raw.githubusercontent.com/cc63/ICON/main/Sub-Store.png" alt="Sub-Store" width="100">
 </p>
