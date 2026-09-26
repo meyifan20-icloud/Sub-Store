@@ -2,9 +2,6 @@ name: 手动同步官方上游 / Sync Upstream
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - master
 
 permissions:
   contents: write
@@ -73,7 +70,6 @@ jobs:
 
           current = Path("README.md").read_text(encoding="utf-8")
           saved = Path("/tmp/personal-overlay/README.md").read_text(encoding="utf-8")
-
           start = "<!-- PERSONAL-UPSTREAM-SYNC:START -->"
           end = "<!-- PERSONAL-UPSTREAM-SYNC:END -->"
 
@@ -96,7 +92,114 @@ jobs:
           Path("README.md").write_text(current, encoding="utf-8")
           PY
 
-      - name: Rewrite runtime and install resource endpoints
+      - name: Mirror upstream release install assets into personal repository
+        shell: bash
+        env:
+          PERSONAL_REPO: meyifan20-icloud/Sub-Store
+          UPSTREAM_REPO: sub-store-org/Sub-Store
+          PERSONAL_BRANCH: master
+        run: |
+          python3 - <<'PY'
+          import os
+          import re
+          import subprocess
+          from pathlib import Path
+
+          upstream = os.environ["UPSTREAM_REPO"]
+          latest = re.compile(
+              rf"https://github\.com/{re.escape(upstream)}/releases/latest/download/([^\s\)\]\"'<>?#]+)"
+          )
+          tagged = re.compile(
+              rf"https://github\.com/{re.escape(upstream)}/releases/download/([^/\s\)\]\"'<>?#]+)/([^\s\)\]\"'<>?#]+)"
+          )
+
+          files = subprocess.check_output(["git", "ls-files", "-z"]).split(b"\0")
+          urls = set()
+
+          for raw in files:
+              if not raw:
+                  continue
+              path = Path(raw.decode("utf-8", errors="surrogateescape"))
+              try:
+                  data = path.read_bytes()
+              except OSError:
+                  continue
+              if b"\0" in data:
+                  continue
+              try:
+                  text = data.decode("utf-8")
+              except UnicodeDecodeError:
+                  continue
+              urls.update(m.group(0) for m in latest.finditer(text))
+              urls.update(m.group(0) for m in tagged.finditer(text))
+
+          with open("/tmp/release-assets.tsv", "w", encoding="utf-8") as out:
+              for url in sorted(urls):
+                  m = latest.fullmatch(url)
+                  if m:
+                      rel = Path(".upstream-release-assets") / "latest" / m.group(1)
+                  else:
+                      m = tagged.fullmatch(url)
+                      rel = Path(".upstream-release-assets") / m.group(1) / m.group(2)
+                  out.write(f"{url}\t{rel.as_posix()}\n")
+
+          print(f"Release install assets to mirror: {len(urls)}")
+          PY
+
+          while IFS=$'\t' read -r url target; do
+            [ -n "$url" ] || continue
+            mkdir -p "$(dirname "$target")"
+            echo "Mirroring $url -> $target"
+            curl -fL --retry 3 --retry-delay 2 --max-time 120 "$url" -o "$target"
+            SIZE=$(wc -c < "$target")
+            if [ "$SIZE" -gt 52428800 ]; then
+              echo "Release asset exceeds 50 MiB safety limit: $target ($SIZE bytes)"
+              exit 1
+            fi
+          done < /tmp/release-assets.tsv
+
+          python3 - <<'PY'
+          import os
+          import subprocess
+          from pathlib import Path
+
+          personal = os.environ["PERSONAL_REPO"]
+          branch = os.environ["PERSONAL_BRANCH"]
+
+          mapping = {}
+          manifest = Path("/tmp/release-assets.tsv")
+          if manifest.exists():
+              for line in manifest.read_text(encoding="utf-8").splitlines():
+                  if not line.strip():
+                      continue
+                  url, target = line.split("\t", 1)
+                  mapping[url] = f"https://raw.githubusercontent.com/{personal}/{branch}/{target}"
+
+          files = subprocess.check_output(["git", "ls-files", "-z"]).split(b"\0")
+          for raw in files:
+              if not raw:
+                  continue
+              path = Path(raw.decode("utf-8", errors="surrogateescape"))
+              try:
+                  data = path.read_bytes()
+              except OSError:
+                  continue
+              if b"\0" in data:
+                  continue
+              try:
+                  text = data.decode("utf-8")
+              except UnicodeDecodeError:
+                  continue
+
+              new = text
+              for old, replacement in mapping.items():
+                  new = new.replace(old, replacement)
+
+              if new != text:
+                  path.write_text(new, encoding="utf-8")
+          PY
+
+      - name: Rewrite runtime and install resource endpoints twice
         shell: bash
         env:
           PERSONAL_REPO: meyifan20-icloud/Sub-Store
@@ -177,6 +280,7 @@ jobs:
 
           python3 - <<'PY'
           import os
+          import re
           import subprocess
           import sys
           from pathlib import Path
@@ -185,7 +289,7 @@ jobs:
           upstream = os.environ["UPSTREAM_REPO"]
           branch = os.environ["UPSTREAM_BRANCH"]
 
-          forbidden = (
+          forbidden_literals = (
               f"https://raw.githubusercontent.com/{upstream}/{branch}/",
               f"https://raw.githubusercontent.com/{upstream}/refs/heads/{branch}/",
               f"https://cdn.jsdelivr.net/gh/{upstream}@{branch}/",
@@ -193,6 +297,9 @@ jobs:
               f"https://vercel.com/new/clone?repository-url=https://github.com/{upstream}",
               f"git clone https://github.com/{upstream}.git",
               f"git clone https://github.com/{upstream}",
+          )
+          release_download = re.compile(
+              rf"https://github\.com/{re.escape(upstream)}/releases/(?:latest/download|download/[^/\s]+)/"
           )
 
           files = subprocess.check_output(["git", "ls-files", "-z"]).split(b"\0")
@@ -214,13 +321,13 @@ jobs:
                   continue
 
               for lineno, line in enumerate(text.splitlines(), 1):
-                  if any(item in line for item in forbidden):
+                  if any(item in line for item in forbidden_literals) or release_download.search(line):
                       bad.append(f"{path}:{lineno}: {line.strip()}")
 
           readme = Path("README.md").read_text(encoding="utf-8")
           required = (
               f"https://github.com/{personal}",
-              f"https://raw.githubusercontent.com/{personal}/{branch}/",
+              f"https://raw.githubusercontent.com/{personal}/master/",
               "<!-- PERSONAL-UPSTREAM-SYNC:START -->",
               "<!-- PERSONAL-UPSTREAM-SYNC:END -->",
           )
