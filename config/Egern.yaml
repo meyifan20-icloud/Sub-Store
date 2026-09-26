@@ -78,7 +78,7 @@ scriptings:
   - http_request:
       name: Sub-Store Core
       match: ^https?:\/\/sub\.store\/((download)|api\/(preview|sync|(utils\/node-info)))
-      script_url: https://github.com/sub-store-org/Sub-Store/releases/latest/download/sub-store-1.min.js
+      script_url: https://raw.githubusercontent.com/meyifan20-icloud/Sub-Store/master/.upstream-release-assets/latest/sub-store-1.min.js
       body_required: true
       max_size: 999999999
       timeout: 900
@@ -87,7 +87,7 @@ scriptings:
   - http_request:
       name: Sub-Store Simple
       match: ^https?:\/\/sub\.store
-      script_url: https://github.com/sub-store-org/Sub-Store/releases/latest/download/sub-store-0.min.js
+      script_url: https://raw.githubusercontent.com/meyifan20-icloud/Sub-Store/master/.upstream-release-assets/latest/sub-store-0.min.js
       body_required: true
       max_size: 999999999
       timeout: 900
@@ -97,7 +97,7 @@ scriptings:
       name: "{{{sync}}}"
       disabled: {{{sync_disabled}}}
       cron: "{{{cronexp}}}"
-      script_url: https://github.com/sub-store-org/Sub-Store/releases/latest/download/cron-sync-artifacts.min.js
+      script_url: https://raw.githubusercontent.com/meyifan20-icloud/Sub-Store/master/.upstream-release-assets/latest/cron-sync-artifacts.min.js
       timeout: 900
       arguments:
         _compat.$argument: "sync_success_notify={{{sync_success_notify}}}"
@@ -105,7 +105,7 @@ scriptings:
       name: "{{{produce}}}"
       disabled: {{{produce_disabled}}}
       cron: "{{{produce_cronexp}}}"
-      script_url: https://github.com/sub-store-org/Sub-Store/releases/latest/download/cron-sync-artifacts.min.js
+      script_url: https://raw.githubusercontent.com/meyifan20-icloud/Sub-Store/master/.upstream-release-assets/latest/cron-sync-artifacts.min.js
       timeout: 900
       arguments:
         _compat.$argument: "sub={{{produce_sub}}}&col={{{produce_col}}}"
