@@ -1,0 +1,11 @@
+**/.git
+**/.github
+**/node_modules
+**/.pnpm-store
+backend/dist
+backend/sub-store.min.js
+.upstream-release-assets
+.runtime
+data
+*.log
+.env
