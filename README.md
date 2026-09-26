@@ -23,6 +23,19 @@
 - RAW 基址：`https://raw.githubusercontent.com/meyifan20-icloud/Sub-Store/master/`
 
 > 上游地址仅供手动同步工作流抓取更新，不作为日常部署、RAW 拉取或安装入口。
+
+## 🚀 自维护部署能力
+
+[![验证自建部署](https://img.shields.io/badge/✅_验证自建部署-Run_validation-238636?style=for-the-badge&logo=githubactions&logoColor=white)](https://github.com/meyifan20-icloud/Sub-Store/actions/workflows/validate-self-host.yml)
+
+- **Docker / Docker Compose：完整能力** — 本仓库源码构建后端，并集成本地前端、HTTP-META、mihomo、shoutrrr 与数据持久化。
+- **Linux / VPS Node.js：完整能力** — `sh deploy/node/prepare-runtime.sh`。
+- **Termux / Android：核心自建能力** — `bash deploy/termux/install.sh`。
+- **代理 App 模块：直接使用本仓库 RAW** — Loon / Surge / QX / Stash / Shadowrocket / Egern。
+
+完整说明：[`docs/DEPLOYMENT.md`](./docs/DEPLOYMENT.md)
+
+> Docker/Node 的 Sub-Store 后端始终从本仓库源码构建；前端、HTTP-META、mihomo、shoutrrr 是独立项目运行依赖，不会重新从 `sub-store-org/Sub-Store` 拉取后端代码。
 <!-- PERSONAL-UPSTREAM-SYNC:END -->
 
 <p align="center">
