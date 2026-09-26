@@ -15,6 +15,14 @@
 官方上游：[`sub-store-org/Sub-Store`](https://github.com/sub-store-org/Sub-Store)（`master`）
 
 > 本仓库按独立仓库维护。同步采用保留本地修改的合并方式；如遇无法自动处理的冲突，工作流会失败并停止推送，避免覆盖个人定制。
+
+**日常使用 / 拉取资源请使用本仓库：**
+
+- 仓库：`https://github.com/meyifan20-icloud/Sub-Store`
+- Git Clone：`https://github.com/meyifan20-icloud/Sub-Store.git`
+- RAW 基址：`https://raw.githubusercontent.com/meyifan20-icloud/Sub-Store/master/`
+
+> 上游地址仅供手动同步工作流抓取更新，不作为日常部署、RAW 拉取或安装入口。
 <!-- PERSONAL-UPSTREAM-SYNC:END -->
 
 <p align="center">
