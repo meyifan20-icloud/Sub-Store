@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout personal repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -40,6 +40,11 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
+      - name: Record current personal revision
+        shell: bash
+        run: |
+          echo "BEFORE_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+
       - name: Fetch official upstream
         shell: bash
         run: |
@@ -50,13 +55,147 @@ jobs:
       - name: Merge upstream safely
         shell: bash
         run: |
-          BEFORE=$(git rev-parse HEAD)
           git merge --no-edit -X ours upstream/master
-          AFTER=$(git rev-parse HEAD)
 
-          if [ "$BEFORE" = "$AFTER" ]; then
-            echo "No upstream changes. Repository is already up to date."
+      - name: Keep resource entry points on personal repository
+        shell: bash
+        env:
+          PERSONAL_REPO: meyifan20-icloud/Sub-Store
+          UPSTREAM_REPO: sub-store-org/Sub-Store
+        run: |
+          python3 - <<'PY'
+          import os
+          import subprocess
+          from pathlib import Path
+
+          personal = os.environ["PERSONAL_REPO"]
+          upstream = os.environ["UPSTREAM_REPO"]
+
+          replacements = {
+              f"https://raw.githubusercontent.com/{upstream}/":
+                  f"https://raw.githubusercontent.com/{personal}/",
+              f"https://cdn.jsdelivr.net/gh/{upstream}@":
+                  f"https://cdn.jsdelivr.net/gh/{personal}@",
+              f"https://cdn.jsdelivr.net/gh/{upstream}/":
+                  f"https://cdn.jsdelivr.net/gh/{personal}/",
+              f"https://deploy.workers.cloudflare.com/?url=https://github.com/{upstream}":
+                  f"https://deploy.workers.cloudflare.com/?url=https://github.com/{personal}",
+              f"https://vercel.com/new/clone?repository-url=https://github.com/{upstream}":
+                  f"https://vercel.com/new/clone?repository-url=https://github.com/{personal}",
+              f"git clone https://github.com/{upstream}.git":
+                  f"git clone https://github.com/{personal}.git",
+              f"git clone https://github.com/{upstream}":
+                  f"git clone https://github.com/{personal}",
+          }
+
+          files = subprocess.check_output(["git", "ls-files", "-z"]).split(b"\0")
+          changed = []
+
+          for raw in files:
+              if not raw:
+                  continue
+              path = Path(raw.decode("utf-8", errors="surrogateescape"))
+              try:
+                  data = path.read_bytes()
+              except OSError:
+                  continue
+              if b"\0" in data:
+                  continue
+              try:
+                  text = data.decode("utf-8")
+              except UnicodeDecodeError:
+                  continue
+
+              new = text
+              for old, replacement in replacements.items():
+                  new = new.replace(old, replacement)
+
+              if new != text:
+                  path.write_text(new, encoding="utf-8")
+                  changed.append(str(path))
+
+          if changed:
+              print("Rewritten resource entry points:")
+              for path in changed:
+                  print(f"  - {path}")
+          else:
+              print("No upstream resource entry points needed rewriting.")
+          PY
+
+          if ! git diff --quiet; then
+            git add -A
+            git commit -m "chore: keep resource endpoints on personal repository"
+          fi
+
+      - name: Verify no upstream resource entry points remain
+        shell: bash
+        env:
+          UPSTREAM_REPO: sub-store-org/Sub-Store
+        run: |
+          python3 - <<'PY'
+          import os
+          import subprocess
+          import sys
+          from pathlib import Path
+
+          upstream = os.environ["UPSTREAM_REPO"]
+          markers = (
+              "raw.githubusercontent.com",
+              "cdn.jsdelivr.net/gh/",
+              "deploy.workers.cloudflare.com/",
+              "vercel.com/new/clone",
+              "git clone ",
+              "repository-url=",
+          )
+
+          files = subprocess.check_output(["git", "ls-files", "-z"]).split(b"\0")
+          bad = []
+
+          for raw in files:
+              if not raw:
+                  continue
+              path = Path(raw.decode("utf-8", errors="surrogateescape"))
+              try:
+                  data = path.read_bytes()
+              except OSError:
+                  continue
+              if b"\0" in data:
+                  continue
+              try:
+                  text = data.decode("utf-8")
+              except UnicodeDecodeError:
+                  continue
+
+              for lineno, line in enumerate(text.splitlines(), 1):
+                  if upstream in line and any(marker in line for marker in markers):
+                      bad.append(f"{path}:{lineno}: {line.strip()}")
+
+          if bad:
+              print("Blocked: upstream resource entry points still remain:")
+              for item in bad:
+                  print(item)
+              sys.exit(1)
+
+          print("Verified: resource entry points do not use upstream repository.")
+          PY
+
+      - name: Push only to personal repository
+        shell: bash
+        run: |
+          AFTER_SHA="$(git rev-parse HEAD)"
+
+          if [ "$BEFORE_SHA" = "$AFTER_SHA" ]; then
+            echo "No upstream changes. Personal repository is already up to date."
             exit 0
           fi
+
+          ORIGIN_URL="$(git remote get-url origin)"
+          case "$ORIGIN_URL" in
+            *"meyifan20-icloud/Sub-Store.git"|*"meyifan20-icloud/Sub-Store") ;;
+            *)
+              echo "Unexpected origin before push: $ORIGIN_URL"
+              exit 1
+              ;;
+          esac
 
           git push origin HEAD:master
