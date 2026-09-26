@@ -21,6 +21,19 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Verify origin is personal repository
+        shell: bash
+        run: |
+          ORIGIN_URL="$(git remote get-url origin)"
+          echo "origin=$ORIGIN_URL"
+          case "$ORIGIN_URL" in
+            *"meyifan20-icloud/Sub-Store.git"|*"meyifan20-icloud/Sub-Store") ;;
+            *)
+              echo "Unexpected origin: $ORIGIN_URL"
+              exit 1
+              ;;
+          esac
+
       - name: Configure git
         shell: bash
         run: |
