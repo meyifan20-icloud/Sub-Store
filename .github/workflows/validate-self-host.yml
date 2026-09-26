@@ -1,0 +1,69 @@
+name: Validate self-host deployments
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+    paths:
+      - "Dockerfile"
+      - "docker-compose.yml"
+      - ".dockerignore"
+      - ".env.example"
+      - ".node-version"
+      - "Makefile"
+      - "deploy/**"
+      - "backend/package.json"
+      - "backend/pnpm-lock.yaml"
+      - "backend/patches/**"
+      - ".github/workflows/validate-self-host.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-self-host
+  cancel-in-progress: true
+
+jobs:
+  node-runtime:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Validate shell scripts
+        run: |
+          sh -n deploy/runtime/start.sh
+          sh -n deploy/node/prepare-runtime.sh
+          bash -n deploy/termux/install.sh
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: ".node-version"
+
+      - name: Build backend
+        run: |
+          corepack enable
+          cd backend
+          pnpm install --frozen-lockfile
+          pnpm bundle:esbuild
+          test -s dist/sub-store.bundle.js
+          test -s dist/runtime-manifest.json
+
+  docker-compose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Validate Compose
+        run: |
+          cp .env.example .env
+          docker compose config >/tmp/sub-store-compose.yml
+          test -s /tmp/sub-store-compose.yml
+
+      - name: Build full self-host image
+        run: |
+          docker build --pull -t sub-store-selfhost:test .
