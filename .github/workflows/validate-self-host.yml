@@ -80,6 +80,19 @@ jobs:
               docker exec sub-store-smoke test -x /usr/local/bin/shoutrrr
               docker exec sub-store-smoke test -s /opt/app/http-meta.bundle.js
               docker exec sub-store-smoke test -s /opt/app/frontend/index.html
+
+              docker exec sub-store-smoke node -e "fetch('http://127.0.0.1:3001/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+
+              META_OK=0
+              for j in $(seq 1 10); do
+                if docker exec sub-store-smoke node -e "const net=require('net');const s=net.connect(9876,'127.0.0.1',()=>{s.end();process.exit(0)});s.on('error',()=>process.exit(1));setTimeout(()=>process.exit(1),2000)"; then
+                  META_OK=1
+                  break
+                fi
+                sleep 1
+              done
+              test "$META_OK" = "1"
+
               exit 0
             fi
 
