@@ -2,9 +2,6 @@ name: 手动同步官方上游 / Sync Upstream
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - master
 
 permissions:
   contents: write
