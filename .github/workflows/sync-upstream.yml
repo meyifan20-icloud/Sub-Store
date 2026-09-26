@@ -2,9 +2,6 @@ name: 手动同步官方上游 / Sync Upstream
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - master
 
 permissions:
   contents: write
@@ -116,7 +113,7 @@ jobs:
               rf"https://github\.com/{re.escape(upstream)}/releases/download/([^/,\s\)\]\"'<>?#]+)/([^,\s\)\]\"'<>?#]+)"
           )
 
-          files = subprocess.check_output(["git", "ls-files", "-z"]).split(b"\0")
+          files = subprocess.check_output(["git", "ls-files", "-z", "--", ".", ":(exclude).upstream-release-assets/**"]).split(b"\0")
           urls = set()
 
           for raw in files:
@@ -178,7 +175,7 @@ jobs:
                   url, target = line.split("\t", 1)
                   mapping[url] = f"https://raw.githubusercontent.com/{personal}/{branch}/{target}"
 
-          files = subprocess.check_output(["git", "ls-files", "-z"]).split(b"\0")
+          files = subprocess.check_output(["git", "ls-files", "-z", "--", ".", ":(exclude).upstream-release-assets/**"]).split(b"\0")
           for raw in files:
               if not raw:
                   continue
@@ -235,7 +232,7 @@ jobs:
                   f"git clone https://github.com/{personal}",
           }
 
-          files = subprocess.check_output(["git", "ls-files", "-z"]).split(b"\0")
+          files = subprocess.check_output(["git", "ls-files", "-z", "--", ".", ":(exclude).upstream-release-assets/**"]).split(b"\0")
           changed = []
 
           for raw in files:
@@ -305,7 +302,7 @@ jobs:
               rf"https://github\.com/{re.escape(upstream)}/releases/(?:latest/download|download/[^/\s]+)/"
           )
 
-          files = subprocess.check_output(["git", "ls-files", "-z"]).split(b"\0")
+          files = subprocess.check_output(["git", "ls-files", "-z", "--", ".", ":(exclude).upstream-release-assets/**"]).split(b"\0")
           bad = []
 
           for raw in files:
