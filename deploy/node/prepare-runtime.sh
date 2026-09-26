@@ -110,7 +110,7 @@ export PATH="$RUNTIME_DIR:\$PATH"
 export SUB_STORE_RUNTIME_ROOT="$RUNTIME_DIR"
 export SUB_STORE_DATA_BASE_PATH="${SUB_STORE_DATA_BASE_PATH:-$RUNTIME_DIR/data}"
 export SUB_STORE_FRONTEND_PATH="${SUB_STORE_FRONTEND_PATH:-$RUNTIME_DIR/frontend}"
-exec "$REPO_ROOT/deploy/runtime/start.sh"
+exec sh "$REPO_ROOT/deploy/runtime/start.sh"
 EOF
 chmod 755 "$RUNTIME_DIR/start.sh"
 
