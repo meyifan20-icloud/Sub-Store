@@ -3,10 +3,38 @@ on:
   schedule:
     - cron: "0 0 * * *"
   workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - ".github/workflows/star-history.yml"
 permissions:
   contents: write
 jobs:
+  credentials:
+    runs-on: ubuntu-latest
+    outputs:
+      configured: ${{ steps.check.outputs.configured }}
+    steps:
+      - name: Check optional Star History credentials
+        id: check
+        env:
+          STAR_HISTORY_TOKEN: ${{ secrets.STAR_HISTORY_TOKEN }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [[ -n "$STAR_HISTORY_TOKEN" ]]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "Star History skipped: STAR_HISTORY_TOKEN is not configured. No chart was generated." >> "$GITHUB_STEP_SUMMARY"
+            if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+              echo "::error::Configure STAR_HISTORY_TOKEN before manually generating Star History."
+              exit 1
+            fi
+            echo "::notice::Optional Star History is not configured; skipping chart generation."
+          fi
   star-history:
+    needs: credentials
+    if: needs.credentials.outputs.configured == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
